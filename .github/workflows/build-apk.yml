@@ -15,8 +15,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      
       - name: Extract Android project
-        run: unzip -o hm_tarot_android_project.zip -d extracted
+        run: |
+          echo "Looking for ZIP archive..."
+          find . -maxdepth 3 -type f -iname "*.zip" -print
+          ZIP_FILE="$(find . -maxdepth 3 -type f -iname "*.zip" | head -n 1)"
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: ZIP archive not found in repository"
+            exit 1
+          fi
+          echo "Extracting: $ZIP_FILE"
+          unzip -o "$ZIP_FILE" -d extracted
+          echo "Checking extracted files..."
+          find extracted -maxdepth 3 -type f | head -80
+          
 
       - name: Set up Java
         uses: actions/setup-java@v4
