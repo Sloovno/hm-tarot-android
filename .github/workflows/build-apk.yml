@@ -42,15 +42,21 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      
       - name: Install SDK packages
+        shell: bash
         run: |
+          set -e
           echo "ANDROID_HOME=$ANDROID_HOME"
-          which sdkmanager
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          SDKMANAGER="$(find "$ANDROID_HOME" -type f -name sdkmanager 2>/dev/null | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found"
+            find "$ANDROID_HOME" -maxdepth 4 -type d
+            exit 1
+          fi
+          echo "Found sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
           
-
       - name: Build APK
         working-directory: extracted/hm_tarot_android_project
         run: gradle --no-daemon assembleDebug
